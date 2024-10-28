@@ -171,7 +171,7 @@ class Lifecycle implements Closeable {
 		configureDaemonAccess(phase);
 		phase.withLogLevelArg();
 		phase.withArgs("-app", this.applicationDirectory);
-		withPlatform(phase);
+		withPlatform(phase, Directory.PLATFORM);
 		phase.withArgs("-run-image", this.request.getRunImage());
 		phase.withArgs("-layers", Directory.LAYERS);
 		phase.withArgs("-cache-dir", Directory.CACHE);
@@ -201,8 +201,8 @@ class Lifecycle implements Closeable {
 		return phase;
 	}
 
-	private void withPlatform(Phase phase) {
-		phase.withArgs("-platform", Directory.PLATFORM);
+	private void withPlatform(Phase phase, String path) {
+		phase.withArgs("-platform", path);
 	}
 
 	private Cache getLayersBindingSource(BuildRequest request) {
