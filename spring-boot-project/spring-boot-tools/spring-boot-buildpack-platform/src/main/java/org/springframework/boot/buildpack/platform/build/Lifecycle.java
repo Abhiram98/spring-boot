@@ -175,7 +175,7 @@ class Lifecycle implements Closeable {
 		phase.withArgs("-run-image", this.request.getRunImage());
 		phase.withArgs("-layers", Directory.LAYERS);
 		phase.withArgs("-cache-dir", Directory.CACHE);
-		phase.withArgs("-launch-cache", Directory.LAUNCH_CACHE);
+		withLaunchCache(phase);
 		phase.withArgs("-daemon");
 		if (this.request.isCleanCache()) {
 			phase.withArgs("-skip-restore");
@@ -199,6 +199,10 @@ class Lifecycle implements Closeable {
 			phase.withEnv(SOURCE_DATE_EPOCH_KEY, Long.toString(this.request.getCreatedDate().getEpochSecond()));
 		}
 		return phase;
+	}
+
+	private void withLaunchCache(Phase phase) {
+		phase.withArgs("-launch-cache", Directory.LAUNCH_CACHE);
 	}
 
 	private Cache getLayersBindingSource(BuildRequest request) {
