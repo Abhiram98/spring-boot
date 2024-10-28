@@ -172,7 +172,7 @@ class Lifecycle implements Closeable {
 		phase.withLogLevelArg();
 		phase.withArgs("-app", this.applicationDirectory);
 		phase.withArgs("-platform", Directory.PLATFORM);
-		withRunImage(phase);
+		withRunImage(phase, this.request.getRunImage());
 		phase.withArgs("-layers", Directory.LAYERS);
 		phase.withArgs("-cache-dir", Directory.CACHE);
 		phase.withArgs("-launch-cache", Directory.LAUNCH_CACHE);
@@ -201,8 +201,8 @@ class Lifecycle implements Closeable {
 		return phase;
 	}
 
-	private void withRunImage(Phase phase) {
-		phase.withArgs("-run-image", this.request.getRunImage());
+	private void withRunImage(Phase phase, ImageReference runImage) {
+		phase.withArgs("-run-image", runImage);
 	}
 
 	private Cache getLayersBindingSource(BuildRequest request) {
