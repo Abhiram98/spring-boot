@@ -183,7 +183,7 @@ class Lifecycle implements Closeable {
 		if (requiresProcessTypeDefault()) {
 			phase.withArgs("-process-type=web");
 		}
-		phase.withArgs(this.request.getName());
+		withImageName(phase);
 		phase.withBinding(Binding.from(getCacheBindingSource(this.layers), Directory.LAYERS));
 		phase.withBinding(Binding.from(getCacheBindingSource(this.application), this.applicationDirectory));
 		phase.withBinding(Binding.from(getCacheBindingSource(this.buildCache), Directory.CACHE));
@@ -199,6 +199,10 @@ class Lifecycle implements Closeable {
 			phase.withEnv(SOURCE_DATE_EPOCH_KEY, Long.toString(this.request.getCreatedDate().getEpochSecond()));
 		}
 		return phase;
+	}
+
+	private void withImageName(Phase phase) {
+		phase.withArgs(this.request.getName());
 	}
 
 	private Cache getLayersBindingSource(BuildRequest request) {
