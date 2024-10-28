@@ -60,6 +60,10 @@ public class MetadataCollector {
 		this.typeUtils = new TypeUtils(processingEnvironment);
 	}
 
+	public Set<ItemMetadata> getMetadataItems() {
+		return this.metadataItems;
+	}
+
 	public void processing(RoundEnvironment roundEnv) {
 		for (Element element : roundEnv.getRootElements()) {
 			markAsProcessed(element);

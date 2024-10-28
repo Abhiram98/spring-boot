@@ -228,7 +228,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 
 	private void processAnnotatedTypeElement(String prefix, TypeElement element, Deque<TypeElement> seen) {
 		String type = this.metadataEnv.getTypeUtils().getQualifiedName(element);
-		this.metadataCollector.add(ItemMetadata.newGroup(prefix, type, type, null));
+		addIfAbsent(ItemMetadata.newGroup(prefix, type, type, null));
 		processTypeElement(prefix, element, null, seen);
 	}
 
@@ -247,7 +247,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 								"Duplicate @ConfigurationProperties definition for prefix '" + prefix + "'", element);
 				}
 				else {
-					this.metadataCollector.add(group);
+					addIfAbsent(group);
 					processTypeElement(prefix, typeElement, element, seen);
 				}
 			}
@@ -259,7 +259,7 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		if (!seen.contains(element)) {
 			seen.push(element);
 			new PropertyDescriptorResolver(this.metadataEnv).resolve(element, source).forEach((descriptor) -> {
-				this.metadataCollector.add(descriptor.resolveItemMetadata(prefix, this.metadataEnv));
+				addIfAbsent(descriptor.resolveItemMetadata(prefix, this.metadataEnv));
 				if (descriptor.isNested(this.metadataEnv)) {
 					TypeElement nestedTypeElement = (TypeElement) this.metadataEnv.getTypeUtils()
 						.asElement(descriptor.getType());
@@ -293,18 +293,26 @@ public class ConfigurationMetadataAnnotationProcessor extends AbstractProcessor 
 		String endpointKey = ItemMetadata.newItemMetadataPrefix("management.endpoint.", endpointId);
 		Boolean enabledByDefault = (Boolean) elementValues.get("enableByDefault");
 		String type = this.metadataEnv.getTypeUtils().getQualifiedName(element);
-		addIfAbsent(endpointKey, type);
-		this.metadataCollector.add(ItemMetadata.newProperty(endpointKey, "enabled", Boolean.class.getName(), type, null,
+		addIfAbsent(ItemMetadata.newGroup(endpointKey, type, type, null));
+		addIfAbsent(ItemMetadata.newProperty(endpointKey, "enabled", Boolean.class.getName(), type, null,
 				String.format("Whether to enable the %s endpoint.", endpointId),
 				(enabledByDefault != null) ? enabledByDefault : true, null));
 		if (hasMainReadOperation(element)) {
-			this.metadataCollector.add(ItemMetadata.newProperty(endpointKey, "cache.time-to-live",
+			addIfAbsent(ItemMetadata.newProperty(endpointKey, "cache.time-to-live",
 					Duration.class.getName(), type, null, "Maximum time that a response can be cached.", "0ms", null));
 		}
 	}
 
-	private void addIfAbsent(String endpointKey, String type) {
-		this.metadataCollector.add(ItemMetadata.newGroup(endpointKey, type, type, null));
+	private boolean addIfAbsent(ItemMetadata metadata) {
+		ItemMetadata existing = this.metadataCollector.getMetadataItems().stream()
+				.filter((candidate) -> metadata.getName().equals(candidate.getName()))
+				.findFirst()
+				.orElse(null);
+
+		if (existing!=null)
+			return false;
+		this.metadataCollector.add(existing);
+		return true;
 	}
 
 	private boolean hasMainReadOperation(TypeElement element) {
