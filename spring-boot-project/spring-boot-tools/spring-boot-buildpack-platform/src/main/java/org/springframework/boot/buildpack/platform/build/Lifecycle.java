@@ -178,7 +178,7 @@ class Lifecycle implements Closeable {
 		phase.withArgs("-launch-cache", Directory.LAUNCH_CACHE);
 		phase.withArgs("-daemon");
 		if (this.request.isCleanCache()) {
-			phase.withArgs("-skip-restore");
+			withSkipRestore(phase);
 		}
 		if (requiresProcessTypeDefault()) {
 			phase.withArgs("-process-type=web");
@@ -199,6 +199,10 @@ class Lifecycle implements Closeable {
 			phase.withEnv(SOURCE_DATE_EPOCH_KEY, Long.toString(this.request.getCreatedDate().getEpochSecond()));
 		}
 		return phase;
+	}
+
+	private void withSkipRestore(Phase phase) {
+		phase.withArgs("-skip-restore");
 	}
 
 	private Cache getLayersBindingSource(BuildRequest request) {
